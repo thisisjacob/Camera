@@ -8,6 +8,8 @@ private:
 	glm::vec3 UpVector;
 	glm::vec3 DirVector;
 	glm::vec3 PosVector;
+	float aspectRatio;
+	float fieldOfView;
 public:
 	PerspectiveCamera();
 	bool NewDirection(glm::vec3);
@@ -20,4 +22,5 @@ public:
 	glm::vec3 Dir();
 	glm::vec3 Up();
 	glm::mat4 ViewMatrix();
+	glm::mat4 ProjectionMatrix();
 };

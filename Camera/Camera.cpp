@@ -5,6 +5,10 @@
 #include <glad/glad.h>
 #include <GLFW/glfw3.h>
 #include "Shader.h"
+#include <glm/glm.hpp>
+#include <glm/gtc/matrix_transform.hpp>
+#include <glm/gtc/type_ptr.hpp>
+#include "PerspectiveCamera.h"
 
 /*
 static const GLfloat g_vertex_buffer_data[] = {
@@ -52,6 +56,8 @@ static const GLfloat g_triangle_vertex_buffer[] = {
     0.0f, 0.5f, 0.0f
 };
 
+PerspectiveCamera camera;
+
 int main()
 {
     GLFWwindow* window;
@@ -95,7 +101,13 @@ int main()
     shader.UseProgram("shader");
     err = glGetError();
 
+    glm::mat4 model = glm::mat4(1.0f);
+    glm::mat4 view = camera.ViewMatrix();
+    glm::mat4 projection = camera.ProjectionMatrix();
     while (!glfwWindowShouldClose(window)) {
+        shader.ModifyUniform("model", 4, 4, glm::value_ptr(model), false);
+        shader.ModifyUniform("view", 4, 4, glm::value_ptr(view), false);
+        shader.ModifyUniform("projection", 4, 4, glm::value_ptr(projection), false);
         glClear(GL_COLOR_BUFFER_BIT);
         glClearColor(0.0f, 0.0f, 0.4f, 0.0f);
         glDrawArrays(GL_TRIANGLES, 0, 3);
