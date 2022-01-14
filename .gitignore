@@ -361,3 +361,7 @@ MigrationBackup/
 
 # Fody - auto-generated XML schema
 FodyWeavers.xsd
+/Camera/fragment.glsl
+/Camera/vertex.glsl
+/Camera/Shader.cpp
+/Camera/Shader.h
