@@ -10,7 +10,8 @@
 #include <glm/gtc/type_ptr.hpp>
 #include "PerspectiveCamera.h"
 
-/*
+void KeyCallback(GLFWwindow* window, int key, int scancode, int action, int mods);
+
 static const GLfloat g_vertex_buffer_data[] = {
     -1.0f,-1.0f,-1.0f, // triangle 1 : begin
     -1.0f,-1.0f, 1.0f,
@@ -48,15 +49,15 @@ static const GLfloat g_vertex_buffer_data[] = {
     1.0f, 1.0f, 1.0f,
     -1.0f, 1.0f, 1.0f,
     1.0f,-1.0f, 1.0f
-};*/
-
-static const GLfloat g_triangle_vertex_buffer[] = {
-    -0.5f, -0.5f, 0.0f,
-    0.5f, -0.5f, 0.0f,
-    0.0f, 0.5f, 0.0f
 };
 
-PerspectiveCamera camera;
+static const GLfloat g_triangle_vertex_buffer[] = {
+    -1.0f, -1.0f, 0.0f,
+    1.0f, -1.0f, 0.0f,
+    0.0f, 1.0f, 0.0f
+};
+
+PerspectiveCamera camera(45.0f, 800.0f, 400.0f);
 
 int main()
 {
@@ -81,15 +82,19 @@ int main()
         std::cerr << "Failed to GLADload\n";
         return -1;
     }
+    // configure OpenGL settings
+    glEnable(GL_DEPTH_TEST);
+    // configure GLFW settings
+    glfwSetKeyCallback(window, KeyCallback);
+    
 
     unsigned int VAO, VBO;
     glGenVertexArrays(1, &VAO);
     glBindVertexArray(VAO);
     glGenBuffers(1, &VBO);
     glBindBuffer(GL_ARRAY_BUFFER, VBO);
-    //glBufferData(GL_ARRAY_BUFFER, 3 * sizeof(GL_FLOAT), g_vertex_buffer_data, GL_STATIC_DRAW);
-    glBufferData(GL_ARRAY_BUFFER, sizeof(g_triangle_vertex_buffer), g_triangle_vertex_buffer, GL_STATIC_DRAW);
-    //glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, 3 * sizeof(GL_FLOAT), (void*)0);
+    glBufferData(GL_ARRAY_BUFFER, sizeof(g_vertex_buffer_data), g_vertex_buffer_data, GL_STATIC_DRAW);
+    //glBufferData(GL_ARRAY_BUFFER, sizeof(g_triangle_vertex_buffer), g_triangle_vertex_buffer, GL_STATIC_DRAW);
     glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, 0, (void*)0);
     glEnableVertexAttribArray(0);
     auto err = glGetError();
@@ -101,16 +106,21 @@ int main()
     shader.UseProgram("shader");
     err = glGetError();
 
-    glm::mat4 model = glm::mat4(1.0f);
-    glm::mat4 view = camera.ViewMatrix();
-    glm::mat4 projection = camera.ProjectionMatrix();
+    camera.NewDirection(0.0, 0.0, -1.0);
+    camera.NewPos(0.0, 0.0, 5.0);
+    camera.NewUp(0.0, 1.0, 0.0);
+
     while (!glfwWindowShouldClose(window)) {
+        glm::mat4 model = glm::mat4(1.0f);
+        model = glm::rotate(model, glm::radians(5 * (float)glfwGetTime()), glm::vec3(1.0f, 1.0f, 0.0f));
+        glm::mat4 view = camera.ViewMatrix();
+        glm::mat4 projection = camera.ProjectionMatrix();
         shader.ModifyUniform("model", 4, 4, glm::value_ptr(model), false);
         shader.ModifyUniform("view", 4, 4, glm::value_ptr(view), false);
         shader.ModifyUniform("projection", 4, 4, glm::value_ptr(projection), false);
-        glClear(GL_COLOR_BUFFER_BIT);
+        glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
         glClearColor(0.0f, 0.0f, 0.4f, 0.0f);
-        glDrawArrays(GL_TRIANGLES, 0, 3);
+        glDrawArrays(GL_TRIANGLES, 0, 36);
         glfwSwapBuffers(window);
         err = glGetError();
         glfwPollEvents();
@@ -118,4 +128,15 @@ int main()
 
     glfwTerminate();
     return 0;
+}
+
+void KeyCallback(GLFWwindow* window, int key, int scancode, int action, int mods) {
+    if (key == GLFW_KEY_W && (action == GLFW_PRESS || action == GLFW_REPEAT))
+        camera.MoveCamera(CameraMovement::FORWARD);
+    if (key == GLFW_KEY_S && (action == GLFW_PRESS || action == GLFW_REPEAT))
+        camera.MoveCamera(CameraMovement::BACKWARD);
+    if (key == GLFW_KEY_A && (action == GLFW_PRESS || action == GLFW_REPEAT))
+        camera.MoveCamera(CameraMovement::LEFT);
+    if (key == GLFW_KEY_D && (action == GLFW_PRESS || action == GLFW_REPEAT))
+        camera.MoveCamera(CameraMovement::RIGHT);
 }

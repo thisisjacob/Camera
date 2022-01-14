@@ -145,6 +145,7 @@
     <ClCompile Include="Shader.cpp" />
   </ItemGroup>
   <ItemGroup>
+    <ClInclude Include="CameraEnums.h" />
     <ClInclude Include="PerspectiveCamera.h" />
     <ClInclude Include="Shader.h" />
   </ItemGroup>
