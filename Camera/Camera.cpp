@@ -11,6 +11,7 @@
 #include "PerspectiveCamera.h"
 
 void KeyCallback(GLFWwindow* window, int key, int scancode, int action, int mods);
+void MouseCallback(GLFWwindow* window, double xpos, double ypos);
 
 static const GLfloat g_vertex_buffer_data[] = {
     -1.0f,-1.0f,-1.0f, // triangle 1 : begin
@@ -58,6 +59,8 @@ static const GLfloat g_triangle_vertex_buffer[] = {
 };
 
 PerspectiveCamera camera(45.0f, 800.0f, 400.0f);
+bool cameraUsed = false;
+float lastXPos, lastYPos = 0;
 
 int main()
 {
@@ -85,7 +88,11 @@ int main()
     // configure OpenGL settings
     glEnable(GL_DEPTH_TEST);
     // configure GLFW settings
+    glfwSetInputMode(window, GLFW_CURSOR, GLFW_CURSOR_DISABLED);
+    glfwSetCursorPosCallback(window, MouseCallback);
     glfwSetKeyCallback(window, KeyCallback);
+    
+    
     
 
     unsigned int VAO, VBO;
@@ -139,4 +146,17 @@ void KeyCallback(GLFWwindow* window, int key, int scancode, int action, int mods
         camera.MoveCamera(CameraMovement::LEFT);
     if (key == GLFW_KEY_D && (action == GLFW_PRESS || action == GLFW_REPEAT))
         camera.MoveCamera(CameraMovement::RIGHT);
+}
+
+void MouseCallback(GLFWwindow* window, double xpos, double ypos) {
+    std::cout << "x: " << xpos << " y: " << ypos << "\n";
+    // If camera has not yet been used, prevent camera from jumping around with the mouse is first moved
+    if (!cameraUsed) {
+        lastXPos = xpos;
+        lastYPos = ypos;
+        cameraUsed = true;
+    }
+    camera.MoveDir(xpos - lastXPos, -ypos + lastYPos);
+    lastXPos = xpos;
+    lastYPos = ypos;
 }

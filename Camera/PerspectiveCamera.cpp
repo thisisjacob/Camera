@@ -7,6 +7,10 @@ PerspectiveCamera::PerspectiveCamera(float fov, float width, float height) {
 	RightVector = glm::vec3(1.0, 0.0, 0.0);
 	fieldOfView = fov;
 	aspectRatio = width / height;
+	yaw = -90.0f;
+	pitch = 0.0f;
+	rotationSensitivity = 0.4f;
+	movementSensitivity = 0.3f;
 }
 
 bool PerspectiveCamera::NewDirection(glm::vec3 dir) {
@@ -51,14 +55,42 @@ bool PerspectiveCamera::UpdateFOV(float fov) {
 
 bool PerspectiveCamera::MoveCamera(CameraMovement direction) {
 	if (direction == CameraMovement::FORWARD)
-		PosVector += 0.05f * DirVector;
+		PosVector += movementSensitivity * DirVector;
 	else if (direction == CameraMovement::BACKWARD)
-		PosVector -= 0.05f * DirVector;
+		PosVector -= movementSensitivity * DirVector;
 	else if (direction == CameraMovement::LEFT)
-		PosVector -= 0.05f * RightVector;
+		PosVector -= movementSensitivity * RightVector;
 	else if (direction == CameraMovement::RIGHT)
-		PosVector += 0.05f * RightVector;
+		PosVector += movementSensitivity * RightVector;
 
+	return true;
+}
+
+bool PerspectiveCamera::MoveDir(float xDist, float yDist) {
+	yaw += rotationSensitivity * xDist;
+	pitch += rotationSensitivity * yDist;
+	if (pitch >= 90.0f)
+		pitch = 90.0f;
+	else if (pitch <= -90.0f)
+		pitch = -90.0f;
+	std::cout << "Yaw: " << yaw << " Pitch: " << pitch << "\n";
+
+	DirVector.x = cos(glm::radians(yaw)) * cos(glm::radians(pitch));
+	DirVector.y = sin(glm::radians(pitch));
+	DirVector.z = sin(glm::radians(yaw)) * cos(glm::radians(pitch));
+	DirVector = glm::normalize(DirVector);
+
+	//TODO: Update Up and Right vectors
+	if (xDist != 0 || yDist != 0)
+		auto i = 0;
+	// Right vector will always have a y of 0
+	// How do the Euler angles affect the right vector?
+	RightVector.x = cos(glm::radians(yaw + 90)) * cos(glm::radians(pitch - 90));
+	RightVector.z = sin(glm::radians(yaw + 90)) * cos(glm::radians(pitch - 90));
+	RightVector = glm::normalize(RightVector);
+	UpVector = glm::cross(DirVector, RightVector);
+	UpVector = glm::normalize(UpVector);
+	
 	return true;
 }
 
