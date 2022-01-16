@@ -1,162 +1,113 @@
-// Camera.cpp : This file contains the 'main' function. Program execution begins and ends there.
-//
+#include "Camera.h"
 
-#include <iostream>
-#include <glad/glad.h>
-#include <GLFW/glfw3.h>
-#include "Shader.h"
-#include <glm/glm.hpp>
-#include <glm/gtc/matrix_transform.hpp>
-#include <glm/gtc/type_ptr.hpp>
-#include "PerspectiveCamera.h"
-
-void KeyCallback(GLFWwindow* window, int key, int scancode, int action, int mods);
-void MouseCallback(GLFWwindow* window, double xpos, double ypos);
-
-static const GLfloat g_vertex_buffer_data[] = {
-    -1.0f,-1.0f,-1.0f, // triangle 1 : begin
-    -1.0f,-1.0f, 1.0f,
-    -1.0f, 1.0f, 1.0f, // triangle 1 : end
-    1.0f, 1.0f,-1.0f, // triangle 2 : begin
-    -1.0f,-1.0f,-1.0f,
-    -1.0f, 1.0f,-1.0f, // triangle 2 : end
-    1.0f,-1.0f, 1.0f,
-    -1.0f,-1.0f,-1.0f,
-    1.0f,-1.0f,-1.0f,
-    1.0f, 1.0f,-1.0f,
-    1.0f,-1.0f,-1.0f,
-    -1.0f,-1.0f,-1.0f,
-    -1.0f,-1.0f,-1.0f,
-    -1.0f, 1.0f, 1.0f,
-    -1.0f, 1.0f,-1.0f,
-    1.0f,-1.0f, 1.0f,
-    -1.0f,-1.0f, 1.0f,
-    -1.0f,-1.0f,-1.0f,
-    -1.0f, 1.0f, 1.0f,
-    -1.0f,-1.0f, 1.0f,
-    1.0f,-1.0f, 1.0f,
-    1.0f, 1.0f, 1.0f,
-    1.0f,-1.0f,-1.0f,
-    1.0f, 1.0f,-1.0f,
-    1.0f,-1.0f,-1.0f,
-    1.0f, 1.0f, 1.0f,
-    1.0f,-1.0f, 1.0f,
-    1.0f, 1.0f, 1.0f,
-    1.0f, 1.0f,-1.0f,
-    -1.0f, 1.0f,-1.0f,
-    1.0f, 1.0f, 1.0f,
-    -1.0f, 1.0f,-1.0f,
-    -1.0f, 1.0f, 1.0f,
-    1.0f, 1.0f, 1.0f,
-    -1.0f, 1.0f, 1.0f,
-    1.0f,-1.0f, 1.0f
-};
-
-static const GLfloat g_triangle_vertex_buffer[] = {
-    -1.0f, -1.0f, 0.0f,
-    1.0f, -1.0f, 0.0f,
-    0.0f, 1.0f, 0.0f
-};
-
-PerspectiveCamera camera(45.0f, 800.0f, 400.0f);
-bool cameraUsed = false;
-float lastXPos, lastYPos = 0;
-
-int main()
-{
-    GLFWwindow* window;
-
-    if (!glfwInit()) {
-        std::cerr << "Error initializing GLFW\n";
-        return -1;
-    }
-
-    glfwWindowHint(GLFW_CONTEXT_VERSION_MAJOR, 4);
-    glfwWindowHint(GLFW_CONTEXT_VERSION_MINOR, 6);
-    window = glfwCreateWindow(800, 400, "Hello World", NULL, NULL);
-    if (!window) {
-        glfwTerminate();
-        std::cerr << "Error creating GLFW window.\n";
-        return -1;
-    }
-
-    glfwMakeContextCurrent(window);
-    if (!gladLoadGLLoader((GLADloadproc)glfwGetProcAddress)) {
-        std::cerr << "Failed to GLADload\n";
-        return -1;
-    }
-    // configure OpenGL settings
-    glEnable(GL_DEPTH_TEST);
-    // configure GLFW settings
-    glfwSetInputMode(window, GLFW_CURSOR, GLFW_CURSOR_DISABLED);
-    glfwSetCursorPosCallback(window, MouseCallback);
-    glfwSetKeyCallback(window, KeyCallback);
-    
-    
-    
-
-    unsigned int VAO, VBO;
-    glGenVertexArrays(1, &VAO);
-    glBindVertexArray(VAO);
-    glGenBuffers(1, &VBO);
-    glBindBuffer(GL_ARRAY_BUFFER, VBO);
-    glBufferData(GL_ARRAY_BUFFER, sizeof(g_vertex_buffer_data), g_vertex_buffer_data, GL_STATIC_DRAW);
-    //glBufferData(GL_ARRAY_BUFFER, sizeof(g_triangle_vertex_buffer), g_triangle_vertex_buffer, GL_STATIC_DRAW);
-    glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, 0, (void*)0);
-    glEnableVertexAttribArray(0);
-    auto err = glGetError();
-
-    Shader shader;
-    shader.AddShader("vertex.glsl", GL_VERTEX_SHADER);
-    shader.AddShader("fragment.glsl", GL_FRAGMENT_SHADER);
-    shader.BuildProgram("shader");
-    shader.UseProgram("shader");
-    err = glGetError();
-
-    camera.NewDirection(0.0, 0.0, -1.0);
-    camera.NewPos(0.0, 0.0, 5.0);
-    camera.NewUp(0.0, 1.0, 0.0);
-
-    while (!glfwWindowShouldClose(window)) {
-        glm::mat4 model = glm::mat4(1.0f);
-        model = glm::rotate(model, glm::radians(5 * (float)glfwGetTime()), glm::vec3(1.0f, 1.0f, 0.0f));
-        glm::mat4 view = camera.ViewMatrix();
-        glm::mat4 projection = camera.ProjectionMatrix();
-        shader.ModifyUniform("model", 4, 4, glm::value_ptr(model), false);
-        shader.ModifyUniform("view", 4, 4, glm::value_ptr(view), false);
-        shader.ModifyUniform("projection", 4, 4, glm::value_ptr(projection), false);
-        glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
-        glClearColor(0.0f, 0.0f, 0.4f, 0.0f);
-        glDrawArrays(GL_TRIANGLES, 0, 36);
-        glfwSwapBuffers(window);
-        err = glGetError();
-        glfwPollEvents();
-    }
-
-    glfwTerminate();
-    return 0;
+Camera::Camera(float fov, float width, float height) {
+	UpVector = glm::vec3(0.0, 1.0, 0.0);
+	DirVector = glm::vec3(0.0, 0.0, -1.0);
+	PosVector = glm::vec3(0.0, 0.0, 3.0);
+	RightVector = glm::vec3(1.0, 0.0, 0.0);
+	fieldOfView = fov;
+	aspectRatio = width / height;
+	yaw = -90.0f;
+	pitch = 0.0f;
+	rotationSensitivity = 0.4f;
+	movementSensitivity = 0.3f;
 }
 
-void KeyCallback(GLFWwindow* window, int key, int scancode, int action, int mods) {
-    if (key == GLFW_KEY_W && (action == GLFW_PRESS || action == GLFW_REPEAT))
-        camera.MoveCamera(CameraMovement::FORWARD);
-    if (key == GLFW_KEY_S && (action == GLFW_PRESS || action == GLFW_REPEAT))
-        camera.MoveCamera(CameraMovement::BACKWARD);
-    if (key == GLFW_KEY_A && (action == GLFW_PRESS || action == GLFW_REPEAT))
-        camera.MoveCamera(CameraMovement::LEFT);
-    if (key == GLFW_KEY_D && (action == GLFW_PRESS || action == GLFW_REPEAT))
-        camera.MoveCamera(CameraMovement::RIGHT);
+bool Camera::NewDirection(glm::vec3 dir) {
+	DirVector = glm::normalize(dir);
+	return true;
 }
 
-void MouseCallback(GLFWwindow* window, double xpos, double ypos) {
-    std::cout << "x: " << xpos << " y: " << ypos << "\n";
-    // If camera has not yet been used, prevent camera from jumping around with the mouse is first moved
-    if (!cameraUsed) {
-        lastXPos = xpos;
-        lastYPos = ypos;
-        cameraUsed = true;
-    }
-    camera.MoveDir(xpos - lastXPos, -ypos + lastYPos);
-    lastXPos = xpos;
-    lastYPos = ypos;
+bool Camera::NewDirection(float x, float y, float z) {
+	DirVector = glm::normalize(glm::vec3(x, y, z));
+	return true;
+}
+
+bool Camera::NewPos(glm::vec3 pos) {
+	PosVector = pos;
+	return true;
+}
+
+bool Camera::NewPos(float x, float y, float z) {
+	PosVector = glm::vec3(x, y, z);
+	return true;
+}
+
+bool Camera::NewUp(glm::vec3 up) {
+	UpVector = glm::normalize(up);
+	return true;
+}
+
+bool Camera::NewUp(float x, float y, float z) {
+	UpVector = glm::normalize(glm::vec3(x, y, z));
+	return true;
+}
+
+bool Camera::NewAspectRatio(float width, float height) {
+	aspectRatio = width / height;
+	return true;
+}
+
+bool Camera::UpdateFOV(float fov) {
+	fieldOfView = fov;
+	return true;
+}
+
+bool Camera::MoveCamera(CameraMovement direction) {
+	if (direction == CameraMovement::FORWARD)
+		PosVector += movementSensitivity * DirVector;
+	else if (direction == CameraMovement::BACKWARD)
+		PosVector -= movementSensitivity * DirVector;
+	else if (direction == CameraMovement::LEFT)
+		PosVector -= movementSensitivity * RightVector;
+	else if (direction == CameraMovement::RIGHT)
+		PosVector += movementSensitivity * RightVector;
+
+	return true;
+}
+
+bool Camera::MoveDir(float xDist, float yDist) {
+	yaw += rotationSensitivity * xDist;
+	pitch += rotationSensitivity * yDist;
+	if (pitch >= 90.0f)
+		pitch = 90.0f;
+	else if (pitch <= -90.0f)
+		pitch = -90.0f;
+	std::cout << "Yaw: " << yaw << " Pitch: " << pitch << "\n";
+
+	DirVector.x = cos(glm::radians(yaw)) * cos(glm::radians(pitch));
+	DirVector.y = sin(glm::radians(pitch));
+	DirVector.z = sin(glm::radians(yaw)) * cos(glm::radians(pitch));
+	DirVector = glm::normalize(DirVector);
+
+	//TODO: Update Up and Right vectors
+	if (xDist != 0 || yDist != 0)
+		auto i = 0;
+	// UpVector is the the world up vector, so we do not need to recalculate it
+	// RightVecotr depends on DirVector, so we find it
+	RightVector = glm::cross(DirVector, UpVector);
+	RightVector = glm::normalize(RightVector);
+	
+	return true;
+}
+
+glm::vec3 Camera::Pos() {
+	return PosVector;
+}
+
+glm::vec3 Camera::Dir() {
+	return DirVector;
+}
+
+glm::vec3 Camera::Up() {
+	return UpVector;
+}
+
+glm::mat4 Camera::ViewMatrix() {
+	return glm::lookAt(PosVector, PosVector + DirVector, UpVector);
+}
+
+glm::mat4 Camera::PerspectiveMatrix() {
+	// TODO: add options for defining near and far planes
+	return glm::perspective(glm::radians(fieldOfView), aspectRatio, 0.1f, 100.0f);
 }
