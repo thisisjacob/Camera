@@ -9,8 +9,11 @@ Camera::Camera(float fov, float width, float height) {
 	aspectRatio = width / height;
 	yaw = -90.0f;
 	pitch = 0.0f;
-	rotationSensitivity = 0.4f;
-	movementSensitivity = 0.3f;
+	rotationSensitivity = 0.2f;
+	movementSensitivity = 0.1f;
+	lastXPos = 0;
+	lastYPos = 0;
+	hasMoved = false;
 }
 
 bool Camera::NewDirection(glm::vec3 dir) {
@@ -66,7 +69,15 @@ bool Camera::MoveCamera(CameraMovement direction) {
 	return true;
 }
 
-bool Camera::MoveDir(float xDist, float yDist) {
+bool Camera::MoveDir(float xPos, float yPos) {
+	// on first move, do not move camera to prevent direction from moving around wildly
+	if (!hasMoved) {
+		hasMoved = true;
+		lastXPos = xPos;
+		lastYPos = yPos;
+	}
+	float xDist = xPos - lastXPos;
+	float yDist = lastYPos - yPos;
 	yaw += rotationSensitivity * xDist;
 	pitch += rotationSensitivity * yDist;
 	if (pitch >= 90.0f)
@@ -75,19 +86,21 @@ bool Camera::MoveDir(float xDist, float yDist) {
 		pitch = -90.0f;
 	std::cout << "Yaw: " << yaw << " Pitch: " << pitch << "\n";
 
+	// Create new direction vectors
 	DirVector.x = cos(glm::radians(yaw)) * cos(glm::radians(pitch));
 	DirVector.y = sin(glm::radians(pitch));
 	DirVector.z = sin(glm::radians(yaw)) * cos(glm::radians(pitch));
 	DirVector = glm::normalize(DirVector);
 
-	//TODO: Update Up and Right vectors
-	if (xDist != 0 || yDist != 0)
-		auto i = 0;
 	// UpVector is the the world up vector, so we do not need to recalculate it
 	// RightVecotr depends on DirVector, so we find it
 	RightVector = glm::cross(DirVector, UpVector);
 	RightVector = glm::normalize(RightVector);
-	
+
+	// Change for next movement
+	lastXPos = xPos;
+	lastYPos = yPos;
+
 	return true;
 }
 

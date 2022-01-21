@@ -24,6 +24,9 @@ private:
 	// Speed of camera alteration
 	float rotationSensitivity;
 	float movementSensitivity;
+	// For determining rotation amount
+	float lastXPos, lastYPos;
+	bool hasMoved;
 public:
 	// Creates a new camera, the position, direction and world up vectors should be defined by the New functions
 	// fov is the camera's field of view, and width and height are the width and height of the windows
@@ -41,7 +44,7 @@ public:
 	// This is used to change the camera's direction, it rotates the camera
 	// xDist changes the yaw, and yDist changes the pitch
 	// Roll cannot be changed
-	bool MoveDir(float xDist, float yDist);
+	bool MoveDir(float xPos, float yPos);
 	glm::vec3 Pos();
 	glm::vec3 Dir();
 	glm::vec3 Up();
