@@ -150,13 +150,5 @@ void KeyCallback(GLFWwindow* window, int key, int scancode, int action, int mods
 
 void MouseCallback(GLFWwindow* window, double xpos, double ypos) {
     std::cout << "x: " << xpos << " y: " << ypos << "\n";
-    // If camera has not yet been used, prevent camera from jumping around with the mouse is first moved
-    if (!cameraUsed) {
-        lastXPos = xpos;
-        lastYPos = ypos;
-        cameraUsed = true;
-    }
-    camera.MoveDir(xpos - lastXPos, -ypos + lastYPos);
-    lastXPos = xpos;
-    lastYPos = ypos;
+    camera.MoveDir(xpos, ypos);
 }
