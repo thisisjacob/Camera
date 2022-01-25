@@ -10,7 +10,7 @@
 #include <glm/gtc/type_ptr.hpp>
 #include "Camera.h"
 
-void KeyCallback(GLFWwindow* window, int key, int scancode, int action, int mods);
+void keyboardInput(GLFWwindow* window, float deltaTime);
 void MouseCallback(GLFWwindow* window, double xpos, double ypos);
 
 static const GLfloat g_vertex_buffer_data[] = {
@@ -90,7 +90,6 @@ int main()
     // configure GLFW settings
     glfwSetInputMode(window, GLFW_CURSOR, GLFW_CURSOR_DISABLED);
     glfwSetCursorPosCallback(window, MouseCallback);
-    glfwSetKeyCallback(window, KeyCallback);
     
     
     
@@ -118,6 +117,7 @@ int main()
     camera.NewUp(0.0, 1.0, 0.0);
 
     while (!glfwWindowShouldClose(window)) {
+        keyboardInput(window, 0.0);
         glm::mat4 model = glm::mat4(1.0f);
         model = glm::rotate(model, glm::radians(5 * (float)glfwGetTime()), glm::vec3(1.0f, 1.0f, 0.0f));
         glm::mat4 view = camera.ViewMatrix();
@@ -128,8 +128,8 @@ int main()
         glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
         glClearColor(0.0f, 0.0f, 0.4f, 0.0f);
         glDrawArrays(GL_TRIANGLES, 0, 36);
-        glfwSwapBuffers(window);
         err = glGetError();
+        glfwSwapBuffers(window);
         glfwPollEvents();
     }
 
@@ -137,14 +137,16 @@ int main()
     return 0;
 }
 
-void KeyCallback(GLFWwindow* window, int key, int scancode, int action, int mods) {
-    if (key == GLFW_KEY_W && (action == GLFW_PRESS || action == GLFW_REPEAT))
+void keyboardInput(GLFWwindow* window, float deltaTime) {
+    if (glfwGetKey(window, GLFW_KEY_ESCAPE) == GLFW_PRESS)
+        glfwSetWindowShouldClose(window, true);
+    if (glfwGetKey(window, GLFW_KEY_W) == GLFW_PRESS)
         camera.MoveCamera(CameraMovement::FORWARD);
-    if (key == GLFW_KEY_S && (action == GLFW_PRESS || action == GLFW_REPEAT))
+    if (glfwGetKey(window, GLFW_KEY_S) == GLFW_PRESS)
         camera.MoveCamera(CameraMovement::BACKWARD);
-    if (key == GLFW_KEY_A && (action == GLFW_PRESS || action == GLFW_REPEAT))
+    if (glfwGetKey(window, GLFW_KEY_A) == GLFW_PRESS)
         camera.MoveCamera(CameraMovement::LEFT);
-    if (key == GLFW_KEY_D && (action == GLFW_PRESS || action == GLFW_REPEAT))
+    if (glfwGetKey(window, GLFW_KEY_D) == GLFW_PRESS)
         camera.MoveCamera(CameraMovement::RIGHT);
 }
 

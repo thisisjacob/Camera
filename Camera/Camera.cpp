@@ -80,10 +80,10 @@ bool Camera::MoveDir(float xPos, float yPos) {
 	float yDist = lastYPos - yPos;
 	yaw += rotationSensitivity * xDist;
 	pitch += rotationSensitivity * yDist;
-	if (pitch >= 90.0f)
-		pitch = 90.0f;
-	else if (pitch <= -90.0f)
-		pitch = -90.0f;
+	if (pitch >= 89.0f)
+		pitch = 89.0f;
+	else if (pitch <= -89.0f)
+		pitch = -89.0f;
 	std::cout << "Yaw: " << yaw << " Pitch: " << pitch << "\n";
 
 	// Create new direction vectors
