@@ -51,6 +51,26 @@ bool Camera::NewAspectRatio(float width, float height) {
 	return true;
 }
 
+bool Camera::NewSensitivity(float rotationSens, float movementSens) {
+	rotationSensitivity = rotationSens;
+	movementSensitivity = movementSens;
+	return true;
+}
+
+bool Camera::NewRotationSensitivity(float rotationSens) { 
+	rotationSensitivity = rotationSens;
+	return true;
+}
+
+bool Camera::NewMovementSensitivity(float movementSens) {
+	movementSensitivity = movementSens;
+	return true;
+}
+
+float Camera::GetMovementSensitivity() { return movementSensitivity; }
+
+float Camera::GetRotationSensitivity() { return rotationSensitivity; }
+
 bool Camera::UpdateFOV(float fov) {
 	fieldOfView = fov;
 	return true;

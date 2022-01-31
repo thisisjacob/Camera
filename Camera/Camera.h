@@ -38,6 +38,11 @@ public:
 	bool NewUp(glm::vec3 up);
 	bool NewUp(float x, float y, float z);
 	bool NewAspectRatio(float width, float height);
+	bool NewSensitivity(float rotationSens, float movementSens);
+	bool NewRotationSensitivity(float rotationSens);
+	bool NewMovementSensitivity(float movementSens);
+	float GetRotationSensitivity();
+	float GetMovementSensitivity();
 	bool UpdateFOV(float fov);
 	// This is used to move the camera's position, relative to the current direction
 	bool MoveCamera(CameraMovement direction);
