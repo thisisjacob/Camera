@@ -35,8 +35,10 @@ public:
 	bool NewDirection(float x, float y, float z);
 	bool NewPos(glm::vec3 pos);
 	bool NewPos(float x, float y, float z);
+	/* Do not currently support rolling, so hide functions for changing the world up vector
 	bool NewUp(glm::vec3 up);
 	bool NewUp(float x, float y, float z);
+	*/
 	bool NewAspectRatio(float width, float height);
 	bool NewSensitivity(float rotationSens, float movementSens);
 	bool NewRotationSensitivity(float rotationSens);

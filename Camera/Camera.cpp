@@ -18,11 +18,15 @@ Camera::Camera(float fov, float width, float height) {
 
 bool Camera::NewDirection(glm::vec3 dir) {
 	DirVector = glm::normalize(dir);
+	RightVector = glm::cross(DirVector, UpVector);
+	RightVector = glm::normalize(RightVector);
 	return true;
 }
 
 bool Camera::NewDirection(float x, float y, float z) {
 	DirVector = glm::normalize(glm::vec3(x, y, z));
+	RightVector = glm::cross(DirVector, UpVector);
+	RightVector = glm::normalize(RightVector);
 	return true;
 }
 
@@ -33,16 +37,6 @@ bool Camera::NewPos(glm::vec3 pos) {
 
 bool Camera::NewPos(float x, float y, float z) {
 	PosVector = glm::vec3(x, y, z);
-	return true;
-}
-
-bool Camera::NewUp(glm::vec3 up) {
-	UpVector = glm::normalize(up);
-	return true;
-}
-
-bool Camera::NewUp(float x, float y, float z) {
-	UpVector = glm::normalize(glm::vec3(x, y, z));
 	return true;
 }
 

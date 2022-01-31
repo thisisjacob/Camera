@@ -114,7 +114,6 @@ int main()
 
     camera.NewDirection(0.0, 0.0, -1.0);
     camera.NewPos(0.0, 0.0, 5.0);
-    camera.NewUp(0.0, 1.0, 0.0);
 
     while (!glfwWindowShouldClose(window)) {
         keyboardInput(window, 0.0);
